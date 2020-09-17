@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
 * Студент: [Богдан Коломиец](https://up.htmlacademy.ru/javascript/21/user/1190941).
-* Наставник: `Неизвестно`.
+* Наставник: [Никита Трофимов](https://up.htmlacademy.ru/javascript/21/user/76777).
 
 ---
 
