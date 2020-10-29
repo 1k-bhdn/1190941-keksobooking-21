@@ -59,6 +59,45 @@ const roomPhotos = [
 ];
 
 const offersData = [];
+const MAP = document.querySelector(`.map`);
+const MAP_PINS = document.querySelector(`.map__pins`);
+const MAP_MAIN_PIN = MAP.querySelector(`.map__pin--main`);
+const MAP_FILTERS_CONTAINER = MAP.querySelector(`.map__filters-container`);
+const MAP_FILTERS_FORM = MAP.querySelector(`.map__filters`);
+const FILTERS_FORM_SELECT = MAP_FILTERS_FORM.querySelectorAll(`select`);
+const FILTERS_FORM_FIELDSET = MAP_FILTERS_FORM.querySelectorAll(`fieldset`);
+const AD_FORM = document.querySelector(`.ad-form`);
+const AD_FORM_FIELDSET = AD_FORM.querySelectorAll(`fieldset`);
+const PIN_TEMPLATE = document.querySelector(`#pin`).content.querySelector(`.map__pin`);
+const CARD_TEMPLATE = document.querySelector(`#card`).content.querySelector(`.map__card`);
+
+const roomTypes = [
+  `palace`,
+  `flat`,
+  `house`,
+  `bungalow`,
+];
+const times = [
+  `12:00`,
+  `13:00`,
+  `14:00`,
+];
+const roomFeatures = [
+  `wifi`,
+  `dishwasher`,
+  `parking`,
+  `washer`,
+  `elevator`,
+  `conditioner`,
+];
+const roomPhotos = [
+  `http://o0.github.io/assets/images/tokyo/hotel1.jpg`,
+  `http://o0.github.io/assets/images/tokyo/hotel2.jpg`,
+  `http://o0.github.io/assets/images/tokyo/hotel3.jpg`,
+];
+
+let offersData = [];
+let offerData = {};
 
 const randomInteger = (min, max) => {
   const randomNum = min - ROUND_UP + Math.random() * (max - min + 1);
@@ -67,6 +106,38 @@ const randomInteger = (min, max) => {
 
 roomFeatures.length = randomInteger(1, roomFeatures.length);
 roomPhotos.length = randomInteger(1, roomPhotos.length);
+const mapMode = (display, disabled) => {
+  FILTERS_FORM_FIELDSET[0].style.display = display;
+  for (let i = 0; i < FILTERS_FORM_SELECT.length; i++) {
+    FILTERS_FORM_SELECT[i].style.display = display;
+  }
+
+  if (MAP.classList.contains(`map--faded`)) {
+    for (let i = 0; i < AD_FORM_FIELDSET.length; i++) {
+      AD_FORM_FIELDSET[i].setAttribute(disabled, disabled);
+    }
+  } else {
+    for (let i = 0; i < AD_FORM_FIELDSET.length; i++) {
+      AD_FORM_FIELDSET[i].removeAttribute(disabled);
+    }
+  }
+};
+
+MAP_MAIN_PIN.addEventListener(`mousedown`, (evt) => {
+  if (evt.button === 0) {
+    MAP.classList.remove(`map--faded`);
+    AD_FORM.classList.remove(`ad-form--disabled`);
+    mapMode(`block`, `disabled`);
+  }
+});
+
+MAP_MAIN_PIN.addEventListener(`keydown`, (evt) => {
+  if (evt.key === `Enter`) {
+    MAP.classList.remove(`map--faded`);
+    AD_FORM.classList.remove(`ad-form--disabled`);
+    mapMode(`block`, `disabled`);
+  }
+});
 
 const generateAdData = (i) => {
 
@@ -146,6 +217,8 @@ const renderAdCard = (data) => {
 
   return CLONED_CARD;
 };
+
+mapMode(`none`, `disabled`);
 
 for (let i = 1; i <= AD_COUNT; i++) {
   let AdData = generateAdData([i]);
