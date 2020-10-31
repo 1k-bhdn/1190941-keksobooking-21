@@ -147,14 +147,18 @@ const renderAdCard = (data) => {
   return CLONED_CARD;
 };
 
-for (let i = 1; i <= AD_COUNT; i++) {
-  let AdData = generateAdData([i]);
-  offersData.push(AdData);
-  AD_PINS_CONTAINER.appendChild(renderAdPin(AdData));
-}
+const init = () => {
+  for (let i = 1; i <= AD_COUNT; i++) {
+    let AdData = generateAdData([i]);
+    offersData.push(AdData);
+    AD_PINS_CONTAINER.appendChild(renderAdPin(AdData));
+  }
 
-AD_CARDS_CONTAINER.appendChild(renderAdCard(offersData[0]));
-PINS_AREA.appendChild(AD_PINS_CONTAINER);
-MAP.insertBefore(AD_CARDS_CONTAINER, FILTERS_CONTAINER);
+  AD_CARDS_CONTAINER.appendChild(renderAdCard(offersData[0]));
+  PINS_AREA.appendChild(AD_PINS_CONTAINER);
+  MAP.insertBefore(AD_CARDS_CONTAINER, FILTERS_CONTAINER);
 
-MAP.classList.remove(`map--faded`);
+  MAP.classList.remove(`map--faded`);
+};
+
+init();
