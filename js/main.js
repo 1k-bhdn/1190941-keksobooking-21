@@ -14,12 +14,30 @@ const Y_LOCATION_START = 130;
 const Y_LOCATION_END = 630;
 const MAP = document.querySelector(`.map`);
 const PINS_AREA = MAP.querySelector(`.map__pins`);
+const MAIN_PIN = MAP.querySelector(`.map__pin--main`);
 const FILTERS_CONTAINER = MAP.querySelector(`.map__filters-container`);
+const FILTERS_FORM = MAP.querySelector(`.map__filters`);
+const FILTERS_FORM_SELECT = FILTERS_FORM.querySelectorAll(`select`);
+const FILTERS_FORM_FIELDSET = FILTERS_FORM.querySelector(`#housing-features`);
+const AD_FORM = document.querySelector(`.ad-form`);
+const AD_FORM_FIELDSET = AD_FORM.querySelectorAll(`fieldset`);
 const PIN_TEMPLATE = document.querySelector(`#pin`).content.querySelector(`.map__pin`);
 const CARD_TEMPLATE = document.querySelector(`#card`).content.querySelector(`.map__card`);
 
 const AD_PINS_CONTAINER = document.createDocumentFragment();
 const AD_CARDS_CONTAINER = document.createDocumentFragment();
+
+let mainPinLocationLeft = MAIN_PIN.style.left;
+let mainPinLocationTop = MAIN_PIN.style.top;
+
+const mainPin = {
+  "location": {
+    "x": parseInt(mainPinLocationLeft) + MAIN_PIN.offsetWidth / 2,
+    "y": parseInt(mainPinLocationTop) + MAIN_PIN.offsetHeight,
+  },
+};
+
+console.log(mainPin);
 
 const roomTypes = [
   {
@@ -59,85 +77,34 @@ const roomPhotos = [
 ];
 
 const offersData = [];
-const MAP = document.querySelector(`.map`);
-const MAP_PINS = document.querySelector(`.map__pins`);
-const MAP_MAIN_PIN = MAP.querySelector(`.map__pin--main`);
-const MAP_FILTERS_CONTAINER = MAP.querySelector(`.map__filters-container`);
-const MAP_FILTERS_FORM = MAP.querySelector(`.map__filters`);
-const FILTERS_FORM_SELECT = MAP_FILTERS_FORM.querySelectorAll(`select`);
-const FILTERS_FORM_FIELDSET = MAP_FILTERS_FORM.querySelectorAll(`fieldset`);
-const AD_FORM = document.querySelector(`.ad-form`);
-const AD_FORM_FIELDSET = AD_FORM.querySelectorAll(`fieldset`);
-const PIN_TEMPLATE = document.querySelector(`#pin`).content.querySelector(`.map__pin`);
-const CARD_TEMPLATE = document.querySelector(`#card`).content.querySelector(`.map__card`);
-
-const roomTypes = [
-  `palace`,
-  `flat`,
-  `house`,
-  `bungalow`,
-];
-const times = [
-  `12:00`,
-  `13:00`,
-  `14:00`,
-];
-const roomFeatures = [
-  `wifi`,
-  `dishwasher`,
-  `parking`,
-  `washer`,
-  `elevator`,
-  `conditioner`,
-];
-const roomPhotos = [
-  `http://o0.github.io/assets/images/tokyo/hotel1.jpg`,
-  `http://o0.github.io/assets/images/tokyo/hotel2.jpg`,
-  `http://o0.github.io/assets/images/tokyo/hotel3.jpg`,
-];
-
-let offersData = [];
-let offerData = {};
 
 const randomInteger = (min, max) => {
   const randomNum = min - ROUND_UP + Math.random() * (max - min + 1);
   return Math.round(randomNum);
 };
+const randomArrayLength = () => {
+  roomFeatures.length = randomInteger(1, roomFeatures.length);
+  roomPhotos.length = randomInteger(1, roomPhotos.length);
+};
 
-roomFeatures.length = randomInteger(1, roomFeatures.length);
-roomPhotos.length = randomInteger(1, roomPhotos.length);
-const mapMode = (display, disabled) => {
-  FILTERS_FORM_FIELDSET[0].style.display = display;
+const mapMode = (display, availability) => {
+  FILTERS_FORM_FIELDSET.style.display = display;
   for (let i = 0; i < FILTERS_FORM_SELECT.length; i++) {
     FILTERS_FORM_SELECT[i].style.display = display;
   }
 
   if (MAP.classList.contains(`map--faded`)) {
     for (let i = 0; i < AD_FORM_FIELDSET.length; i++) {
-      AD_FORM_FIELDSET[i].setAttribute(disabled, disabled);
+      AD_FORM_FIELDSET[i].setAttribute(availability, availability);
     }
   } else {
     for (let i = 0; i < AD_FORM_FIELDSET.length; i++) {
-      AD_FORM_FIELDSET[i].removeAttribute(disabled);
+      AD_FORM_FIELDSET[i].removeAttribute(availability);
     }
   }
 };
 
-MAP_MAIN_PIN.addEventListener(`mousedown`, (evt) => {
-  if (evt.button === 0) {
-    MAP.classList.remove(`map--faded`);
-    AD_FORM.classList.remove(`ad-form--disabled`);
-    mapMode(`block`, `disabled`);
-  }
-});
-
-MAP_MAIN_PIN.addEventListener(`keydown`, (evt) => {
-  if (evt.key === `Enter`) {
-    MAP.classList.remove(`map--faded`);
-    AD_FORM.classList.remove(`ad-form--disabled`);
-    mapMode(`block`, `disabled`);
-  }
-});
+randomArrayLength();
 
 const generateAdData = (i) => {
 
@@ -218,16 +185,35 @@ const renderAdCard = (data) => {
   return CLONED_CARD;
 };
 
-mapMode(`none`, `disabled`);
+const init = () => {
+  for (let i = 1; i <= AD_COUNT; i++) {
+    let AdData = generateAdData([i]);
+    offersData.push(AdData);
+    AD_PINS_CONTAINER.appendChild(renderAdPin(AdData));
+  }
 
-for (let i = 1; i <= AD_COUNT; i++) {
-  let AdData = generateAdData([i]);
-  offersData.push(AdData);
-  AD_PINS_CONTAINER.appendChild(renderAdPin(AdData));
-}
+  mapMode(`none`, `disabled`);
 
-AD_CARDS_CONTAINER.appendChild(renderAdCard(offersData[0]));
-PINS_AREA.appendChild(AD_PINS_CONTAINER);
-MAP.insertBefore(AD_CARDS_CONTAINER, FILTERS_CONTAINER);
+  const activateMap = () => {
+    MAP.classList.remove(`map--faded`);
+    AD_FORM.classList.remove(`ad-form--disabled`);
+    mapMode(`block`, `disabled`);
+    AD_CARDS_CONTAINER.appendChild(renderAdCard(offersData[0]));
+    PINS_AREA.appendChild(AD_PINS_CONTAINER);
+    MAP.insertBefore(AD_CARDS_CONTAINER, FILTERS_CONTAINER);
+  };
 
-MAP.classList.remove(`map--faded`);
+  MAIN_PIN.addEventListener(`mousedown`, (evt) => {
+    if (evt.button === 0) {
+      activateMap();
+    }
+  });
+
+  MAIN_PIN.addEventListener(`keydown`, (evt) => {
+    if (evt.key === `Enter`) {
+      activateMap();
+    }
+  });
+};
+
+init();
