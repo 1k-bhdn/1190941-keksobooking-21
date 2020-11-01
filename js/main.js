@@ -12,6 +12,7 @@ const X_LOCATION_START = 50;
 const X_LOCATION_END = 1150;
 const Y_LOCATION_START = 130;
 const Y_LOCATION_END = 630;
+const MAIN_PIN_AFTER_HEIGHT = 22;
 const MAP = document.querySelector(`.map`);
 const PINS_AREA = MAP.querySelector(`.map__pins`);
 const MAIN_PIN = MAP.querySelector(`.map__pin--main`);
@@ -20,24 +21,35 @@ const FILTERS_FORM = MAP.querySelector(`.map__filters`);
 const FILTERS_FORM_SELECT = FILTERS_FORM.querySelectorAll(`select`);
 const FILTERS_FORM_FIELDSET = FILTERS_FORM.querySelector(`#housing-features`);
 const AD_FORM = document.querySelector(`.ad-form`);
+const AD_FORM_ADDRESS = AD_FORM.querySelector(`#address`);
+const AD_FORM_ROOM_COUNT = AD_FORM.querySelector(`#room_number`);
+const AD_FORM_ROOM_CAPACITY = AD_FORM.querySelector(`#capacity`);
 const AD_FORM_FIELDSET = AD_FORM.querySelectorAll(`fieldset`);
 const PIN_TEMPLATE = document.querySelector(`#pin`).content.querySelector(`.map__pin`);
 const CARD_TEMPLATE = document.querySelector(`#card`).content.querySelector(`.map__card`);
-
 const AD_PINS_CONTAINER = document.createDocumentFragment();
 const AD_CARDS_CONTAINER = document.createDocumentFragment();
 
-let mainPinLocationLeft = MAIN_PIN.style.left;
-let mainPinLocationTop = MAIN_PIN.style.top;
+AD_FORM_ROOM_CAPACITY.addEventListener(`change`, () => {
+  if (AD_FORM_ROOM_COUNT.value === `1` && AD_FORM_ROOM_CAPACITY.value !== `1`) {
+    AD_FORM_ROOM_CAPACITY.setCustomValidity(`В 1-й комнате может разместиться только 1 гость.`);
+  } else if (AD_FORM_ROOM_COUNT.value === `2` && AD_FORM_ROOM_CAPACITY.value !== `1` && AD_FORM_ROOM_CAPACITY.value !== `2`) {
+    AD_FORM_ROOM_CAPACITY.setCustomValidity(`2 комнаты предусматривают размещение до 2-х гостей.`);
+  } else if (AD_FORM_ROOM_COUNT.value === `3` && AD_FORM_ROOM_CAPACITY.value === `0`) {
+    AD_FORM_ROOM_CAPACITY.setCustomValidity(`3 комнаты предусмотрены для размещения гостей, пожалуйста укажите количество.`);
+  } else if (AD_FORM_ROOM_COUNT.value === `100` && AD_FORM_ROOM_CAPACITY.value !== `0`) {
+    AD_FORM_ROOM_CAPACITY.setCustomValidity(`100 комнат не для гостей.`);
+  } else {
+    AD_FORM_ROOM_CAPACITY.setCustomValidity(``);
+  }
+});
 
-const mainPin = {
-  "location": {
-    "x": parseInt(mainPinLocationLeft) + MAIN_PIN.offsetWidth / 2,
-    "y": parseInt(mainPinLocationTop) + MAIN_PIN.offsetHeight,
+const mainPinLeftTop = {
+  "coordinates": {
+    "x": parseInt(MAIN_PIN.style.left, 10),
+    "y": parseInt(MAIN_PIN.style.top, 10),
   },
 };
-
-console.log(mainPin);
 
 const roomTypes = [
   {
@@ -57,11 +69,13 @@ const roomTypes = [
     "translate": `Бунгало`,
   },
 ];
+
 const times = [
   `12:00`,
   `13:00`,
   `14:00`,
 ];
+
 const roomFeatures = [
   `wifi`,
   `dishwasher`,
@@ -70,6 +84,7 @@ const roomFeatures = [
   `elevator`,
   `conditioner`,
 ];
+
 const roomPhotos = [
   `http://o0.github.io/assets/images/tokyo/hotel1.jpg`,
   `http://o0.github.io/assets/images/tokyo/hotel2.jpg`,
@@ -78,11 +93,18 @@ const roomPhotos = [
 
 const offersData = [];
 
+const getMainPinStartLocation = () => {
+  AD_FORM_ADDRESS.value = Math.round((mainPinLeftTop.coordinates.x + MAIN_PIN.offsetWidth / 2))
+    + `, `
+    + Math.round((mainPinLeftTop.coordinates.y + MAIN_PIN.offsetHeight / 2));
+};
+
 const randomInteger = (min, max) => {
   const randomNum = min - ROUND_UP + Math.random() * (max - min + 1);
   return Math.round(randomNum);
 };
-const randomArrayLength = () => {
+
+const arrayRandomLength = () => {
   roomFeatures.length = randomInteger(1, roomFeatures.length);
   roomPhotos.length = randomInteger(1, roomPhotos.length);
 };
@@ -104,7 +126,7 @@ const mapMode = (display, availability) => {
   }
 };
 
-randomArrayLength();
+arrayRandomLength();
 
 const generateAdData = (i) => {
 
@@ -193,6 +215,13 @@ const init = () => {
   }
 
   mapMode(`none`, `disabled`);
+  getMainPinStartLocation();
+
+  const getMainPinLocation = () => {
+    AD_FORM_ADDRESS.value = Math.round((mainPinLeftTop.coordinates.x + MAIN_PIN.offsetWidth / 2))
+      + `, `
+      + Math.round((mainPinLeftTop.coordinates.y + MAIN_PIN.offsetHeight + MAIN_PIN_AFTER_HEIGHT));
+  };
 
   const activateMap = () => {
     MAP.classList.remove(`map--faded`);
@@ -201,6 +230,7 @@ const init = () => {
     AD_CARDS_CONTAINER.appendChild(renderAdCard(offersData[0]));
     PINS_AREA.appendChild(AD_PINS_CONTAINER);
     MAP.insertBefore(AD_CARDS_CONTAINER, FILTERS_CONTAINER);
+    getMainPinLocation();
   };
 
   MAIN_PIN.addEventListener(`mousedown`, (evt) => {
