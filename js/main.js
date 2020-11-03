@@ -91,21 +91,13 @@ const roomPhotos = [
 
 const offersData = [];
 
-const getMainPinStartLocation = () => {
-  AD_FORM_ADDRESS.value = Math.round((mainPinLeftTop.coordinates.x + MAIN_PIN.offsetWidth / 2))
-    + `, `
-    + Math.round((mainPinLeftTop.coordinates.y + MAIN_PIN.offsetHeight / 2));
-};
-
 const randomInteger = (min, max) => {
   const randomNum = min - ROUND_UP + Math.random() * (max - min + 1);
   return Math.round(randomNum);
 };
 
-const arrayRandomLength = () => {
-  roomFeatures.length = randomInteger(1, roomFeatures.length);
-  roomPhotos.length = randomInteger(1, roomPhotos.length);
-};
+roomFeatures.length = randomInteger(1, roomFeatures.length);
+roomPhotos.length = randomInteger(1, roomPhotos.length);
 
 const mapMode = (display, availability) => {
   FILTERS_FORM_FIELDSET.style.display = display;
@@ -123,8 +115,6 @@ const mapMode = (display, availability) => {
     }
   }
 };
-
-arrayRandomLength();
 
 const generateAdData = (i) => {
 
@@ -214,21 +204,20 @@ const init = () => {
   }
 
   mapMode(`none`, `disabled`);
-  getMainPinStartLocation();
-
-  const getMainPinLocation = () => {
-    AD_FORM_ADDRESS.value = Math.round((mainPinLeftTop.coordinates.x + MAIN_PIN.offsetWidth / 2))
-      + `, `
-      + Math.round((mainPinLeftTop.coordinates.y + MAIN_PIN.offsetHeight + MAIN_PIN_AFTER_HEIGHT));
-  };
+  AD_FORM_ADDRESS.value = Math.round((mainPinLeftTop.coordinates.x + MAIN_PIN.offsetWidth / 2))
+    + `, `
+    + Math.round((mainPinLeftTop.coordinates.y + MAIN_PIN.offsetHeight / 2));
 
   const activateMap = () => {
     MAP.classList.remove(`map--faded`);
     AD_FORM.classList.remove(`ad-form--disabled`);
     mapMode(`block`, `disabled`);
+    AD_CARDS_CONTAINER.appendChild(renderAdCard(offersData[0]));
     PINS_AREA.appendChild(AD_PINS_CONTAINER);
     MAP.insertBefore(AD_CARDS_CONTAINER, FILTERS_CONTAINER);
-    getMainPinLocation();
+    AD_FORM_ADDRESS.value = Math.round((mainPinLeftTop.coordinates.x + MAIN_PIN.offsetWidth / 2))
+      + `, `
+      + Math.round((mainPinLeftTop.coordinates.y + MAIN_PIN.offsetHeight + MAIN_PIN_AFTER_HEIGHT));
 
     const AD_CARDS = MAP.querySelectorAll(`.map__card`);
     for (let i = 0; i < AD_CARDS.length; i++) {
