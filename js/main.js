@@ -91,13 +91,16 @@ const roomPhotos = [
 
 const offersData = [];
 
-const randomInteger = (min, max) => {
-  const randomNum = min - ROUND_UP + Math.random() * (max - min + 1);
-  return Math.round(randomNum);
-};
+const ROOM_FEATURES_LENGTH = roomFeatures.length;
+const ROOM_PHOTOS_LENGTH = roomPhotos.length;
 
-roomFeatures.length = randomInteger(1, roomFeatures.length);
-roomPhotos.length = randomInteger(1, roomPhotos.length);
+const randomLength = (array, arrayStaticLength) => {
+  let count = array.length;
+
+  count = randomInteger(1, arrayStaticLength);
+
+  return count;
+};
 
 const mapMode = (display, availability) => {
   FILTERS_FORM_FIELDSET.style.display = display;
@@ -116,6 +119,11 @@ const mapMode = (display, availability) => {
   }
 };
 
+const randomInteger = (min, max) => {
+  const randomNum = min - ROUND_UP + Math.random() * (max - min + 1);
+  return Math.round(randomNum);
+};
+
 const generateAdData = (i) => {
 
   return {
@@ -131,9 +139,9 @@ const generateAdData = (i) => {
       "guests": randomInteger(MIN_GUESTS, MAX_GUESTS),
       "checkin": times[randomInteger(0, times.length - 1)],
       "checkout": times[randomInteger(0, times.length - 1)],
-      "features": roomFeatures,
+      "features": randomLength(roomFeatures, ROOM_FEATURES_LENGTH),
       "description": `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.`,
-      "photos": roomPhotos,
+      "photos": randomLength(roomPhotos, ROOM_PHOTOS_LENGTH),
     },
     "location": {
       "x": randomInteger(X_LOCATION_START, X_LOCATION_END),
@@ -195,6 +203,45 @@ const renderAdCard = (data) => {
   return CLONED_CARD;
 };
 
+const hideHtmlElements = (nodeList) => {
+  for (let i = 0; i < nodeList.length; i++) {
+    nodeList[i].style.display = `none`;
+  }
+};
+
+const showHtmlElement = (nodeList, i) => {
+  hideHtmlElements(nodeList);
+  nodeList[i].style.display = `block`;
+};
+
+const closeModals = (nodeList, closeButtons, [i]) => {
+  window.addEventListener(`keydown`, (evt) => {
+    if (evt.key === `Escape`) {
+      nodeList[i].style.display = `none`;
+    }
+  });
+
+  closeButtons[i].addEventListener(`mousedown`, () => {
+    nodeList[i].style.display = `none`;
+  });
+};
+
+const showModalWhenInteraction = (targets, modals, closeButtons) => {
+  for (let i = 0; i < targets.length; i++) {
+    targets[i].addEventListener(`mousedown`, () => {
+      showHtmlElement(modals, [i]);
+      closeModals(modals, closeButtons, [i]);
+    });
+
+    targets[i].addEventListener(`keydown`, (evt) => {
+      if (evt.key === `Enter`) {
+        showHtmlElement(modals, [i]);
+        closeModals(modals, closeButtons, [i]);
+      }
+    });
+  }
+};
+
 const init = () => {
   for (let i = 1; i <= AD_COUNT; i++) {
     let AdData = generateAdData([i]);
@@ -220,46 +267,11 @@ const init = () => {
       + Math.round((mainPinLeftTop.coordinates.y + MAIN_PIN.offsetHeight + MAIN_PIN_AFTER_HEIGHT));
 
     const AD_CARDS = MAP.querySelectorAll(`.map__card`);
-    for (let i = 0; i < AD_CARDS.length; i++) {
-      AD_CARDS[i].style.display = `none`;
-    }
-
+    const CARD_CLOSE_BUTTONS = MAP.querySelectorAll(`.popup__close`);
     const PINS = PINS_AREA.querySelectorAll(`.map__pin:not(:first-of-type)`);
-    for (let i = 0; i < PINS.length; i++) {
 
-      const CLOSE_CARD = AD_CARDS[i].querySelector(`.popup__close`);
-
-      const modalShow = () => {
-        for (let j = 0; j < AD_CARDS.length; j++) {
-          AD_CARDS[j].style.display = `none`;
-        }
-        AD_CARDS[i].style.display = `block`;
-      };
-
-      const modalClose = () => {
-        window.addEventListener(`keydown`, (evt) => {
-          if (evt.key === `Escape`) {
-            AD_CARDS[i].style.display = `none`;
-          }
-        });
-
-        CLOSE_CARD.addEventListener(`mousedown`, () => {
-          AD_CARDS[i].style.display = `none`;
-        });
-      };
-
-      PINS[i].addEventListener(`mousedown`, () => {
-        modalShow();
-        modalClose();
-      });
-
-      PINS[i].addEventListener(`keydown`, (evt) => {
-        if (evt.key === `Enter`) {
-          modalShow();
-          modalClose();
-        }
-      });
-    }
+    hideHtmlElements(AD_CARDS);
+    showModalWhenInteraction(PINS, AD_CARDS, CARD_CLOSE_BUTTONS);
 
     AD_FORM_ROOM_CAPACITY.addEventListener(`change`, () => {
       let roomCount = AD_FORM_ROOM_COUNT.value;
