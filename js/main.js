@@ -104,13 +104,13 @@ const togglePinAvailability = (isAvailable) => {
     }
   };
 
-  if (isAvailable === false) {
-    toggleFieldsAvailability(`none`);
-  } else if (isAvailable === true) {
+  if (isAvailable) {
     MAP.classList.remove(`map--faded`);
     AD_FORM.classList.remove(`ad-form--disabled`);
 
     toggleFieldsAvailability(`block`);
+  } else {
+    toggleFieldsAvailability(`none`);
   }
 };
 
