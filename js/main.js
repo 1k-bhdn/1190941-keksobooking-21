@@ -7,7 +7,7 @@ const MAX_ROOM_COST = 70000;
 const MIN_ROOM_COUNT = 1;
 const MAX_ROOM_COUNT = 3;
 const MIN_GUESTS = 0;
-const MAX_GUESTS = 5;
+const MAX_GUESTS = 3;
 const X_LOCATION_START = 50;
 const X_LOCATION_END = 1150;
 const Y_LOCATION_START = 130;
@@ -91,15 +91,8 @@ const roomPhotos = [
 
 const offersData = [];
 
-const ROOM_FEATURES_LENGTH = roomFeatures.length;
-const ROOM_PHOTOS_LENGTH = roomPhotos.length;
-
-const randomLength = (array, arrayStaticLength) => {
-  let count = array.length;
-
-  count = randomInteger(1, arrayStaticLength);
-
-  return count;
+const arrayRandomLength = (array) => {
+  return array.slice(0, randomInteger(1, array.length));
 };
 
 const togglePinAvailability = (isAvailable) => {
@@ -149,9 +142,9 @@ const generateAdData = (i) => {
       "guests": randomInteger(MIN_GUESTS, MAX_GUESTS),
       "checkin": times[randomInteger(0, times.length - 1)],
       "checkout": times[randomInteger(0, times.length - 1)],
-      "features": randomLength(roomFeatures, ROOM_FEATURES_LENGTH),
+      "features": arrayRandomLength(roomFeatures),
       "description": `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.`,
-      "photos": randomLength(roomPhotos, ROOM_PHOTOS_LENGTH),
+      "photos": arrayRandomLength(roomPhotos),
     },
     "location": {
       "x": randomInteger(X_LOCATION_START, X_LOCATION_END),
@@ -267,7 +260,6 @@ const init = () => {
 
   const activateMap = () => {
     togglePinAvailability(true);
-    AD_CARDS_CONTAINER.appendChild(renderAdCard(offersData[0]));
     PINS_AREA.appendChild(AD_PINS_CONTAINER);
     MAP.insertBefore(AD_CARDS_CONTAINER, FILTERS_CONTAINER);
     AD_FORM_ADDRESS.value = Math.round((mainPinLeftTop.coordinates.x + MAIN_PIN.offsetWidth / 2))
