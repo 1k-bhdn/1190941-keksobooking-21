@@ -12,14 +12,30 @@ const X_LOCATION_START = 50;
 const X_LOCATION_END = 1150;
 const Y_LOCATION_START = 130;
 const Y_LOCATION_END = 630;
+const MAIN_PIN_AFTER_HEIGHT = 22;
 const MAP = document.querySelector(`.map`);
 const PINS_AREA = MAP.querySelector(`.map__pins`);
+const MAIN_PIN = MAP.querySelector(`.map__pin--main`);
 const FILTERS_CONTAINER = MAP.querySelector(`.map__filters-container`);
+const FILTERS_FORM = MAP.querySelector(`.map__filters`);
+const FILTERS_FORM_SELECT = FILTERS_FORM.querySelectorAll(`select`);
+const FILTERS_FORM_FIELDSET = FILTERS_FORM.querySelector(`#housing-features`);
+const AD_FORM = document.querySelector(`.ad-form`);
+const AD_FORM_ADDRESS = AD_FORM.querySelector(`#address`);
+const AD_FORM_ROOM_COUNT = AD_FORM.querySelector(`#room_number`);
+const AD_FORM_ROOM_CAPACITY = AD_FORM.querySelector(`#capacity`);
+const AD_FORM_FIELDSET = AD_FORM.querySelectorAll(`fieldset`);
 const PIN_TEMPLATE = document.querySelector(`#pin`).content.querySelector(`.map__pin`);
 const CARD_TEMPLATE = document.querySelector(`#card`).content.querySelector(`.map__card`);
-
 const AD_PINS_CONTAINER = document.createDocumentFragment();
 const AD_CARDS_CONTAINER = document.createDocumentFragment();
+
+const mainPinLeftTop = {
+  "coordinates": {
+    "x": parseInt(MAIN_PIN.style.left, 10),
+    "y": parseInt(MAIN_PIN.style.top, 10),
+  },
+};
 
 const roomTypes = [
   {
@@ -39,11 +55,13 @@ const roomTypes = [
     "translate": `Бунгало`,
   },
 ];
+
 const times = [
   `12:00`,
   `13:00`,
   `14:00`,
 ];
+
 const roomFeatures = [
   `wifi`,
   `dishwasher`,
@@ -52,6 +70,7 @@ const roomFeatures = [
   `elevator`,
   `conditioner`,
 ];
+
 const roomPhotos = [
   `http://o0.github.io/assets/images/tokyo/hotel1.jpg`,
   `http://o0.github.io/assets/images/tokyo/hotel2.jpg`,
@@ -67,6 +86,33 @@ const randomInteger = (min, max) => {
 
 roomFeatures.length = randomInteger(1, roomFeatures.length);
 roomPhotos.length = randomInteger(1, roomPhotos.length);
+
+const togglePinAvailability = (isAvailable) => {
+  const toggleFieldsAvailability = (display) => {
+    FILTERS_FORM_FIELDSET.style.display = display;
+
+    for (let i = 0; i < FILTERS_FORM_SELECT.length; i++) {
+      FILTERS_FORM_SELECT[i].style.display = display;
+    }
+
+    for (let i = 0; i < AD_FORM_FIELDSET.length; i++) {
+      if (isAvailable) {
+        AD_FORM_FIELDSET[i].removeAttribute(`disabled`);
+      } else {
+        AD_FORM_FIELDSET[i].setAttribute(`disabled`, `disabled`);
+      }
+    }
+  };
+
+  if (isAvailable) {
+    MAP.classList.remove(`map--faded`);
+    AD_FORM.classList.remove(`ad-form--disabled`);
+
+    toggleFieldsAvailability(`block`);
+  } else {
+    toggleFieldsAvailability(`none`);
+  }
+};
 
 const generateAdData = (i) => {
 
@@ -154,11 +200,49 @@ const init = () => {
     AD_PINS_CONTAINER.appendChild(renderAdPin(AdData));
   }
 
-  AD_CARDS_CONTAINER.appendChild(renderAdCard(offersData[0]));
-  PINS_AREA.appendChild(AD_PINS_CONTAINER);
-  MAP.insertBefore(AD_CARDS_CONTAINER, FILTERS_CONTAINER);
+  togglePinAvailability(false);
+  AD_FORM_ADDRESS.value = Math.round((mainPinLeftTop.coordinates.x + MAIN_PIN.offsetWidth / 2))
+    + `, `
+    + Math.round((mainPinLeftTop.coordinates.y + MAIN_PIN.offsetHeight / 2));
 
-  MAP.classList.remove(`map--faded`);
+  const activateMap = () => {
+    togglePinAvailability(true);
+    AD_CARDS_CONTAINER.appendChild(renderAdCard(offersData[0]));
+    PINS_AREA.appendChild(AD_PINS_CONTAINER);
+    MAP.insertBefore(AD_CARDS_CONTAINER, FILTERS_CONTAINER);
+    AD_FORM_ADDRESS.value = Math.round((mainPinLeftTop.coordinates.x + MAIN_PIN.offsetWidth / 2))
+      + `, `
+      + Math.round((mainPinLeftTop.coordinates.y + MAIN_PIN.offsetHeight + MAIN_PIN_AFTER_HEIGHT));
+
+    AD_FORM_ROOM_CAPACITY.addEventListener(`change`, () => {
+      let roomCount = AD_FORM_ROOM_COUNT.value;
+      let roomCapacity = AD_FORM_ROOM_CAPACITY.value;
+
+      if (roomCount === `1` && roomCapacity !== `1`) {
+        AD_FORM_ROOM_CAPACITY.setCustomValidity(`В 1-й комнате может разместиться только 1 гость.`);
+      } else if (roomCount === `2` && roomCapacity !== `1` && roomCapacity !== `2`) {
+        AD_FORM_ROOM_CAPACITY.setCustomValidity(`2 комнаты предусматривают размещение до 2-х гостей.`);
+      } else if (roomCount === `3` && roomCapacity === `0`) {
+        AD_FORM_ROOM_CAPACITY.setCustomValidity(`3 комнаты предусмотрены для размещения гостей, пожалуйста укажите количество.`);
+      } else if (roomCount === `100` && roomCapacity !== `0`) {
+        AD_FORM_ROOM_CAPACITY.setCustomValidity(`100 комнат не для гостей.`);
+      } else {
+        AD_FORM_ROOM_CAPACITY.setCustomValidity(``);
+      }
+    });
+  };
+
+  MAIN_PIN.addEventListener(`mousedown`, (evt) => {
+    if (evt.button === 0) {
+      activateMap();
+    }
+  });
+
+  MAIN_PIN.addEventListener(`keydown`, (evt) => {
+    if (evt.key === `Enter`) {
+      activateMap();
+    }
+  });
 };
 
 init();
