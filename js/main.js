@@ -102,20 +102,30 @@ const randomLength = (array, arrayStaticLength) => {
   return count;
 };
 
-const mapMode = (display, availability) => {
-  FILTERS_FORM_FIELDSET.style.display = display;
-  for (let i = 0; i < FILTERS_FORM_SELECT.length; i++) {
-    FILTERS_FORM_SELECT[i].style.display = display;
-  }
+const togglePinAvailability = (isAvailable) => {
+  const toggleFieldsAvailability = (display) => {
+    FILTERS_FORM_FIELDSET.style.display = display;
 
-  if (MAP.classList.contains(`map--faded`)) {
-    for (let i = 0; i < AD_FORM_FIELDSET.length; i++) {
-      AD_FORM_FIELDSET[i].setAttribute(availability, availability);
+    for (let i = 0; i < FILTERS_FORM_SELECT.length; i++) {
+      FILTERS_FORM_SELECT[i].style.display = display;
     }
+
+    for (let i = 0; i < AD_FORM_FIELDSET.length; i++) {
+      if (isAvailable) {
+        AD_FORM_FIELDSET[i].removeAttribute(`disabled`);
+      } else {
+        AD_FORM_FIELDSET[i].setAttribute(`disabled`, `disabled`);
+      }
+    }
+  };
+
+  if (isAvailable) {
+    MAP.classList.remove(`map--faded`);
+    AD_FORM.classList.remove(`ad-form--disabled`);
+
+    toggleFieldsAvailability(`block`);
   } else {
-    for (let i = 0; i < AD_FORM_FIELDSET.length; i++) {
-      AD_FORM_FIELDSET[i].removeAttribute(availability);
-    }
+    toggleFieldsAvailability(`none`);
   }
 };
 
@@ -250,15 +260,13 @@ const init = () => {
     AD_CARDS_CONTAINER.appendChild(renderAdCard(AdData));
   }
 
-  mapMode(`none`, `disabled`);
+  togglePinAvailability(false);
   AD_FORM_ADDRESS.value = Math.round((mainPinLeftTop.coordinates.x + MAIN_PIN.offsetWidth / 2))
     + `, `
     + Math.round((mainPinLeftTop.coordinates.y + MAIN_PIN.offsetHeight / 2));
 
   const activateMap = () => {
-    MAP.classList.remove(`map--faded`);
-    AD_FORM.classList.remove(`ad-form--disabled`);
-    mapMode(`block`, `disabled`);
+    togglePinAvailability(true);
     AD_CARDS_CONTAINER.appendChild(renderAdCard(offersData[0]));
     PINS_AREA.appendChild(AD_PINS_CONTAINER);
     MAP.insertBefore(AD_CARDS_CONTAINER, FILTERS_CONTAINER);
