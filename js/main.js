@@ -7,7 +7,7 @@ const MAX_ROOM_COST = 70000;
 const MIN_ROOM_COUNT = 1;
 const MAX_ROOM_COUNT = 3;
 const MIN_GUESTS = 0;
-const MAX_GUESTS = 5;
+const MAX_GUESTS = 3;
 const X_LOCATION_START = 50;
 const X_LOCATION_END = 1150;
 const Y_LOCATION_START = 130;
@@ -21,7 +21,19 @@ const FILTERS_FORM = MAP.querySelector(`.map__filters`);
 const FILTERS_FORM_SELECT = FILTERS_FORM.querySelectorAll(`select`);
 const FILTERS_FORM_FIELDSET = FILTERS_FORM.querySelector(`#housing-features`);
 const AD_FORM = document.querySelector(`.ad-form`);
+const AD_FORM_TITLE = AD_FORM.querySelector(`#title`);
+const TITLE_MIN_LENGTH = AD_FORM_TITLE.getAttribute(`minlength`);
+const TITLE_MAX_LENGTH = AD_FORM_TITLE.getAttribute(`maxlength`);
 const AD_FORM_ADDRESS = AD_FORM.querySelector(`#address`);
+const AD_FORM_ROOM_TYPE = AD_FORM.querySelector(`#type`);
+const AD_FORM_ROOM_PRICE = AD_FORM.querySelector(`#price`);
+const BUNGALOW_MIN_COST = 0;
+const FLAT_MIN_COST = 1000;
+const HOUSE_MIN_COST = 5000;
+const PALACE_MIN_COST = 10000;
+const AD_FORM_TIME = AD_FORM.querySelector(`.ad-form__element--time`);
+const TIME_IN = AD_FORM_TIME.querySelector(`#timein`);
+const TIME_OUT = AD_FORM_TIME.querySelector(`#timeout`);
 const AD_FORM_ROOM_COUNT = AD_FORM.querySelector(`#room_number`);
 const AD_FORM_ROOM_CAPACITY = AD_FORM.querySelector(`#capacity`);
 const AD_FORM_FIELDSET = AD_FORM.querySelectorAll(`fieldset`);
@@ -79,13 +91,9 @@ const roomPhotos = [
 
 const offersData = [];
 
-const randomInteger = (min, max) => {
-  const randomNum = min - ROUND_UP + Math.random() * (max - min + 1);
-  return Math.round(randomNum);
+const arrayRandomLength = (array) => {
+  return array.slice(0, randomInteger(1, array.length));
 };
-
-roomFeatures.length = randomInteger(1, roomFeatures.length);
-roomPhotos.length = randomInteger(1, roomPhotos.length);
 
 const togglePinAvailability = (isAvailable) => {
   const toggleFieldsAvailability = (display) => {
@@ -114,6 +122,11 @@ const togglePinAvailability = (isAvailable) => {
   }
 };
 
+const randomInteger = (min, max) => {
+  const randomNum = min - ROUND_UP + Math.random() * (max - min + 1);
+  return Math.round(randomNum);
+};
+
 const generateAdData = (i) => {
 
   return {
@@ -129,9 +142,9 @@ const generateAdData = (i) => {
       "guests": randomInteger(MIN_GUESTS, MAX_GUESTS),
       "checkin": times[randomInteger(0, times.length - 1)],
       "checkout": times[randomInteger(0, times.length - 1)],
-      "features": roomFeatures,
+      "features": arrayRandomLength(roomFeatures),
       "description": `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.`,
-      "photos": roomPhotos,
+      "photos": arrayRandomLength(roomPhotos),
     },
     "location": {
       "x": randomInteger(X_LOCATION_START, X_LOCATION_END),
@@ -193,11 +206,51 @@ const renderAdCard = (data) => {
   return CLONED_CARD;
 };
 
+const hideHtmlElements = (nodeList) => {
+  for (let i = 0; i < nodeList.length; i++) {
+    nodeList[i].style.display = `none`;
+  }
+};
+
+const showHtmlElement = (nodeList, i) => {
+  hideHtmlElements(nodeList);
+  nodeList[i].style.display = `block`;
+};
+
+const closeModals = (nodeList, closeButtons, [i]) => {
+  window.addEventListener(`keydown`, (evt) => {
+    if (evt.key === `Escape`) {
+      nodeList[i].style.display = `none`;
+    }
+  });
+
+  closeButtons[i].addEventListener(`mousedown`, () => {
+    nodeList[i].style.display = `none`;
+  });
+};
+
+const showModalWhenInteraction = (targets, modals, closeButtons) => {
+  for (let i = 0; i < targets.length; i++) {
+    targets[i].addEventListener(`mousedown`, () => {
+      showHtmlElement(modals, [i]);
+      closeModals(modals, closeButtons, [i]);
+    });
+
+    targets[i].addEventListener(`keydown`, (evt) => {
+      if (evt.key === `Enter`) {
+        showHtmlElement(modals, [i]);
+        closeModals(modals, closeButtons, [i]);
+      }
+    });
+  }
+};
+
 const init = () => {
   for (let i = 1; i <= AD_COUNT; i++) {
     let AdData = generateAdData([i]);
     offersData.push(AdData);
     AD_PINS_CONTAINER.appendChild(renderAdPin(AdData));
+    AD_CARDS_CONTAINER.appendChild(renderAdCard(AdData));
   }
 
   togglePinAvailability(false);
@@ -207,12 +260,18 @@ const init = () => {
 
   const activateMap = () => {
     togglePinAvailability(true);
-    AD_CARDS_CONTAINER.appendChild(renderAdCard(offersData[0]));
     PINS_AREA.appendChild(AD_PINS_CONTAINER);
     MAP.insertBefore(AD_CARDS_CONTAINER, FILTERS_CONTAINER);
     AD_FORM_ADDRESS.value = Math.round((mainPinLeftTop.coordinates.x + MAIN_PIN.offsetWidth / 2))
       + `, `
       + Math.round((mainPinLeftTop.coordinates.y + MAIN_PIN.offsetHeight + MAIN_PIN_AFTER_HEIGHT));
+
+    const AD_CARDS = MAP.querySelectorAll(`.map__card`);
+    const CARD_CLOSE_BUTTONS = MAP.querySelectorAll(`.popup__close`);
+    const PINS = PINS_AREA.querySelectorAll(`.map__pin:not(:first-of-type)`);
+
+    hideHtmlElements(AD_CARDS);
+    showModalWhenInteraction(PINS, AD_CARDS, CARD_CLOSE_BUTTONS);
 
     AD_FORM_ROOM_CAPACITY.addEventListener(`change`, () => {
       let roomCount = AD_FORM_ROOM_COUNT.value;
@@ -228,6 +287,62 @@ const init = () => {
         AD_FORM_ROOM_CAPACITY.setCustomValidity(`100 комнат не для гостей.`);
       } else {
         AD_FORM_ROOM_CAPACITY.setCustomValidity(``);
+      }
+    });
+
+    AD_FORM_TITLE.addEventListener(`input`, () => {
+      let titleLength = AD_FORM_TITLE.value.length;
+
+      if (titleLength < TITLE_MIN_LENGTH) {
+        AD_FORM_TITLE.setCustomValidity(`Ещё ` + (TITLE_MIN_LENGTH - titleLength) + ` симв.`);
+      } else if (titleLength > TITLE_MAX_LENGTH) {
+        AD_FORM_TITLE.setCustomValidity(`Удалите лишние ` + (titleLength - TITLE_MAX_LENGTH) + ` симв.`);
+      } else {
+        AD_FORM_TITLE.setCustomValidity(``);
+      }
+
+      AD_FORM_TITLE.reportValidity();
+    });
+
+    AD_FORM_ROOM_TYPE.addEventListener(`change`, () => {
+      let roomType = AD_FORM_ROOM_TYPE.value;
+      AD_FORM_ROOM_PRICE.value = ``;
+
+      if (roomType === `bungalow`) {
+        AD_FORM_ROOM_PRICE.setAttribute(`placeholder`, String(BUNGALOW_MIN_COST));
+      } else if (roomType === `flat`) {
+        AD_FORM_ROOM_PRICE.setAttribute(`placeholder`, String(FLAT_MIN_COST));
+      } else if (roomType === `house`) {
+        AD_FORM_ROOM_PRICE.setAttribute(`placeholder`, String(HOUSE_MIN_COST));
+      } else if (roomType === `palace`) {
+        AD_FORM_ROOM_PRICE.setAttribute(`placeholder`, String(PALACE_MIN_COST));
+      }
+    });
+
+    AD_FORM_ROOM_PRICE.addEventListener(`input`, () => {
+      let roomCost = AD_FORM_ROOM_PRICE.value;
+      let roomType = AD_FORM_ROOM_TYPE.value;
+
+      if (roomType === `flat` && roomCost < FLAT_MIN_COST) {
+        AD_FORM_ROOM_PRICE.setCustomValidity(`Минимальная цена для размещения в квартире на 1-ну ночь ` + FLAT_MIN_COST + ` руб.`);
+      } else if (roomType === `house` && roomCost < HOUSE_MIN_COST) {
+        AD_FORM_ROOM_PRICE.setCustomValidity(`Минимальная цена для размещения в доме на 1-ну ночь ` + HOUSE_MIN_COST + ` руб.`);
+      } else if (roomType === `palace` && roomCost < PALACE_MIN_COST) {
+        AD_FORM_ROOM_PRICE.setCustomValidity(`Минимальная цена для размещения в дворце на 1-ну ночь ` + PALACE_MIN_COST + ` руб.`);
+      } else {
+        AD_FORM_ROOM_PRICE.setCustomValidity(``);
+      }
+    });
+
+    TIME_IN.addEventListener(`change`, () => {
+      if (TIME_IN.value !== TIME_OUT.value) {
+        TIME_OUT.value = TIME_IN.value;
+      }
+    });
+
+    TIME_OUT.addEventListener(`change`, () => {
+      if (TIME_OUT.value !== TIME_IN.value) {
+        TIME_IN.value = TIME_OUT.value;
       }
     });
   };
