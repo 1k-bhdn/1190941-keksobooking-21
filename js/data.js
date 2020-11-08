@@ -8,10 +8,12 @@
   const MAX_ROOM_COUNT = 3;
   const MIN_GUESTS = 0;
   const MAX_GUESTS = 3;
-  const X_LOCATION_START = 50;
-  const X_LOCATION_END = 1150;
-  const Y_LOCATION_START = 130;
-  const Y_LOCATION_END = 630;
+  const AD_PIN_HALF_WIDTH = 25;
+  const AD_PIN_HEIGHT = 70;
+  const X_LOCATION_START = 0 - AD_PIN_HALF_WIDTH;
+  const X_LOCATION_END = 1200 - AD_PIN_HALF_WIDTH;
+  const Y_LOCATION_START = 130 - AD_PIN_HEIGHT;
+  const Y_LOCATION_END = 630 - AD_PIN_HEIGHT;
 
   const roomTypes = [
     {
