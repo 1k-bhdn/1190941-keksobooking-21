@@ -24,7 +24,6 @@
       for (let i = 0; i < AD_FORM_FIELDSET.length; i++) {
         if (isAvailable) {
           AD_FORM_FIELDSET[i].removeAttribute(`disabled`);
-          AD_FORM_ADDRESS.value = window.pin.mainPinActiveLocation;
         } else {
           AD_FORM_FIELDSET[i].setAttribute(`disabled`, `disabled`);
           AD_FORM_ADDRESS.value = window.pin.mainPinNotActiveLocation;
