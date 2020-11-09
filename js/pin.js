@@ -7,6 +7,10 @@
   const AD_FORM_ADDRESS = AD_FORM.querySelector(`#address`);
   const PIN_TEMPLATE = document.querySelector(`#pin`).content.querySelector(`.map__pin`);
   const MAIN_PIN_AFTER_HEIGHT = 22;
+  const X_LOCATION_START = 0 - MAIN_PIN.offsetWidth / 2;
+  const X_LOCATION_END = 1200 - MAIN_PIN.offsetWidth / 2;
+  const Y_LOCATION_START = 130 - (MAIN_PIN.offsetHeight + MAIN_PIN_AFTER_HEIGHT);
+  const Y_LOCATION_END = 630 - (MAIN_PIN.offsetHeight + MAIN_PIN_AFTER_HEIGHT);
 
   const mainPinLeftTop = {
     "coordinates": {
@@ -14,6 +18,72 @@
       "y": parseInt(MAIN_PIN.style.top, 10),
     },
   };
+
+  const calcCoords = () => {
+    let mainPinCoordsX = Math.round((mainPinLeftTop.coordinates.x + MAIN_PIN.offsetWidth / 2));
+    let mainPinCoordsY = Math.round((mainPinLeftTop.coordinates.y + MAIN_PIN.offsetHeight + MAIN_PIN_AFTER_HEIGHT));
+
+    AD_FORM_ADDRESS.value = mainPinCoordsX + `, ` + mainPinCoordsY;
+  };
+
+  const moveMainPin = () => {
+    MAIN_PIN.addEventListener(`mousedown`, function (evt) {
+      evt.preventDefault();
+
+      calcCoords();
+
+      let startCoords = {
+        x: evt.clientX,
+        y: evt.clientY
+      };
+
+      let onMouseMove = (moveEvt) => {
+        moveEvt.preventDefault();
+
+        let shift = {
+          x: startCoords.x - moveEvt.clientX,
+          y: startCoords.y - moveEvt.clientY
+        };
+
+        startCoords = {
+          x: moveEvt.clientX,
+          y: moveEvt.clientY
+        };
+
+        MAIN_PIN.style.top = (MAIN_PIN.offsetTop - shift.y) + `px`;
+        MAIN_PIN.style.left = (MAIN_PIN.offsetLeft - shift.x) + `px`;
+
+        mainPinLeftTop.coordinates.x = parseInt(MAIN_PIN.style.left, 10);
+        mainPinLeftTop.coordinates.y = parseInt(MAIN_PIN.style.top, 10);
+
+        if (mainPinLeftTop.coordinates.y < Y_LOCATION_START) {
+          MAIN_PIN.style.top = Y_LOCATION_START + `px`;
+        } else if (mainPinLeftTop.coordinates.y > Y_LOCATION_END) {
+          MAIN_PIN.style.top = Y_LOCATION_END + `px`;
+        }
+
+        if (mainPinLeftTop.coordinates.x < X_LOCATION_START) {
+          MAIN_PIN.style.left = X_LOCATION_START + `px`;
+        } else if (mainPinLeftTop.coordinates.x > X_LOCATION_END) {
+          MAIN_PIN.style.left = X_LOCATION_END + `px`;
+        }
+
+        calcCoords();
+      };
+
+      let onMouseUp = (upEvt) => {
+        upEvt.preventDefault();
+
+        document.removeEventListener(`mousemove`, onMouseMove);
+        document.removeEventListener(`mouseup`, onMouseUp);
+      };
+
+      document.addEventListener(`mousemove`, onMouseMove);
+      document.addEventListener(`mouseup`, onMouseUp);
+    });
+  };
+
+  moveMainPin();
 
   window.pin = {
     renderAdPin: (data) => {
