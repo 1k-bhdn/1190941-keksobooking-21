@@ -98,8 +98,6 @@
       return CLONED_AD_PIN;
     },
     togglePinAvailability: (isAvailable) => {
-      window.server.get(window.map.successHandler, window.map.errorHandler);
-
       if (isAvailable) {
         MAP.classList.remove(`map--faded`);
         AD_FORM.classList.remove(`ad-form--disabled`);

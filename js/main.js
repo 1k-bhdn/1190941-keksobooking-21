@@ -9,13 +9,13 @@ const init = () => {
     if (evt.button === 0) {
       window.map.activateMap();
     }
-  });
+  }, {once: true});
 
   MAIN_PIN.addEventListener(`keydown`, (evt) => {
     if (evt.key === `Enter`) {
       window.map.activateMap();
     }
-  });
+  }, {once: true});
 };
 
 init();

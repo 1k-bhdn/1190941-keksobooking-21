@@ -20,6 +20,9 @@
         }
       });
 
+      xhr.open(`GET`, URL);
+      xhr.send();
+
       xhr.addEventListener(`error`, function () {
         onError(`Произошла ошибка соединения`);
       });
@@ -28,9 +31,6 @@
       });
 
       xhr.timeout = TIMEOUT_IN_MS;
-
-      xhr.open(`GET`, URL);
-      xhr.send();
     },
     post: (data, onSuccess, onError) => {
       let xhr = new XMLHttpRequest();
