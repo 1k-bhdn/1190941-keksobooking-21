@@ -8,7 +8,7 @@
   const TIMEOUT_IN_MS = 10000;
 
   window.server = {
-    download: (onSuccess, onError) => {
+    get: (onSuccess, onError) => {
       let xhr = new XMLHttpRequest();
       xhr.responseType = `json`;
 
@@ -32,12 +32,16 @@
       xhr.open(`GET`, URL);
       xhr.send();
     },
-    upload: (data, onSuccess) => {
+    post: (data, onSuccess, onError) => {
       let xhr = new XMLHttpRequest();
       xhr.responseType = `json`;
 
       xhr.addEventListener(`load`, () => {
         onSuccess(xhr.response);
+      });
+
+      xhr.addEventListener(`error`, function () {
+        onError(`Произошла ошибка, данные не отправились`);
       });
 
       xhr.open(`POST`, URL);

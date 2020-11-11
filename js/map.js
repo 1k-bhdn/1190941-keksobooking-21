@@ -11,27 +11,6 @@
   const AD_PINS_CONTAINER = document.createDocumentFragment();
   const AD_CARDS_CONTAINER = document.createDocumentFragment();
 
-  const successHandler = (offersData) => {
-    for (let i = 0; i <= adCount - 1; i++) {
-      AD_PINS_CONTAINER.appendChild(window.pin.renderAdPin(offersData[i]));
-      AD_CARDS_CONTAINER.appendChild(window.card.renderAdCard(offersData[i]));
-    }
-  };
-
-  const errorHandler = (errorMessage) => {
-    const node = document.createElement(`div`);
-    node.style = `z-index: 100; margin: 0 auto; text-align: center; background-color: red; color: white; padding: 10px;`;
-    node.style.position = `absolute`;
-    node.style.left = `0`;
-    node.style.right = `0`;
-    node.style.fontSize = `30px`;
-
-    node.textContent = errorMessage;
-    document.body.insertAdjacentElement(`afterbegin`, node);
-  };
-
-  window.server.download(successHandler, errorHandler);
-
   window.map = {
     toggleFieldsAvailability: (display) => {
       FILTERS_FORM_FIELDSET.style.display = display;
@@ -39,6 +18,23 @@
       for (let i = 0; i < FILTERS_FORM_SELECT.length; i++) {
         FILTERS_FORM_SELECT[i].style.display = display;
       }
+    },
+    successHandler: (offersData) => {
+      for (let i = 0; i <= adCount - 1; i++) {
+        AD_PINS_CONTAINER.appendChild(window.pin.renderAdPin(offersData[i]));
+        AD_CARDS_CONTAINER.appendChild(window.card.renderAdCard(offersData[i]));
+      }
+    },
+    errorHandler: (errorMessage) => {
+      const node = document.createElement(`div`);
+      node.style = `z-index: 100; margin: 0 auto; text-align: center; background-color: red; color: white; padding: 10px;`;
+      node.style.position = `absolute`;
+      node.style.left = `0`;
+      node.style.right = `0`;
+      node.style.fontSize = `30px`;
+
+      node.textContent = errorMessage;
+      document.body.insertAdjacentElement(`afterbegin`, node);
     },
     activateMap: () => {
       window.pin.togglePinAvailability(true);
