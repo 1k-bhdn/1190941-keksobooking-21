@@ -31,22 +31,34 @@
       const CARD_PHOTOS = CLONED_CARD.querySelector(`.popup__photos`);
       const CARD_PHOTO = CLONED_CARD.querySelector(`.popup__photo`);
 
-      let roomType = data.offer.type.translate;
-
       CARD_AVATAR.src = data.author.avatar;
       CARD_TITLE.textContent = data.offer.title;
       CARD_ADDRESS.textContent = data.offer.address;
       CARD_PRICE.textContent = data.offer.price + `₽/ночь`;
-      CARD_TYPE.textContent = roomType;
       CARD_CAPACITY.textContent = data.offer.rooms + ` комнаты для ` + data.offer.guests + ` гостей.`;
       CARD_TIME.textContent = `Заезд после ` + data.offer.checkin + `, выезд до ` + data.offer.checkout;
+
+      if (data.offer.type === `palace`) {
+        CARD_TYPE.textContent = `Квартира`;
+      } else if (data.offer.type === `flat`) {
+        CARD_TYPE.textContent = `Дворец`;
+      } else if (data.offer.type === `house`) {
+        CARD_TYPE.textContent = `Дом`;
+      } else if (data.offer.type === `bungalow`) {
+        CARD_TYPE.textContent = `Бунгало`;
+      }
 
       for (let i = 5; i > data.offer.features.length - 1; i--) {
         CARD_FEATURES.removeChild(CARD_FEATURE[i]);
       }
 
       CARD_DESCRIPTION.textContent = data.offer.description;
-      CARD_PHOTO.src = data.offer.photos[0];
+
+      if (data.offer.photos.length !== 0) {
+        CARD_PHOTO.src = data.offer.photos[0];
+      } else {
+        CLONED_CARD.removeChild(CARD_PHOTOS);
+      }
 
       for (let i = 1; i < data.offer.photos.length; i++) {
         let CLONED_PHOTO = CARD_PHOTO.cloneNode(true);
