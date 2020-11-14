@@ -1,6 +1,8 @@
 "use strict";
 
 (() => {
+  const MAP = document.querySelector(`.map`);
+  const PINS_AREA = document.querySelector(`.map__pins`);
   const BUNGALOW_MIN_COST = 0;
   const FLAT_MIN_COST = 1000;
   const HOUSE_MIN_COST = 5000;
@@ -18,6 +20,54 @@
   const TIME_OUT = AD_FORM_TIME.querySelector(`#timeout`);
   const AD_FORM_ROOM_COUNT = AD_FORM.querySelector(`#room_number`);
   const AD_FORM_ROOM_CAPACITY = AD_FORM.querySelector(`#capacity`);
+  const AD_FORM_ROOM_DESCRIPTION = AD_FORM.querySelector(`#description`);
+  const AD_FORM_FEATURES = AD_FORM.querySelectorAll(`.feature__checkbox`);
+
+  const clearData = () => {
+    MAP.classList.add(`map--faded`);
+    AD_FORM.classList.add(`ad-form--disabled`);
+    window.pin.setMainPinStartLocation();
+    const PINS = PINS_AREA.querySelectorAll(`.map__pin:not(:first-of-type)`);
+    const CARDS = MAP.querySelectorAll(`.map__card`);
+
+    for (let i = 0; i < PINS.length; i++) {
+      PINS[i].remove();
+    }
+
+    for (let i = 0; i < CARDS.length; i++) {
+      CARDS[i].remove();
+    }
+
+    window.pin.togglePinAvailability(false);
+
+    AD_FORM_TITLE.value = ``;
+    AD_FORM_ROOM_TYPE.value = `flat`;
+    AD_FORM_ROOM_PRICE.value = ``;
+    AD_FORM_ROOM_PRICE.setAttribute(`placeholder`, String(FLAT_MIN_COST));
+    AD_FORM_ROOM_COUNT.value = 1;
+    AD_FORM_ROOM_CAPACITY.value = 1;
+    AD_FORM_ROOM_DESCRIPTION.value = ``;
+    TIME_IN.value = `12:00`;
+    TIME_OUT.value = `12:00`;
+
+    for (let i = 0; i < AD_FORM_FEATURES.length; i++) {
+      AD_FORM_FEATURES[i].checked = false;
+    }
+  };
+
+  AD_FORM.addEventListener(`submit`, (evt) => {
+    window.server.post(new FormData(AD_FORM), () => {
+      clearData();
+      window.modal.showSuccessModal();
+    });
+
+    evt.preventDefault();
+  });
+
+  AD_FORM.addEventListener(`reset`, (evt) => {
+    clearData();
+    evt.preventDefault();
+  });
 
   window.form = {
     toggleFieldsAvailability: (isAvailable) => {

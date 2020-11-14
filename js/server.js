@@ -1,7 +1,6 @@
 "use strict";
 
 (() => {
-  const URL = `https://21.javascript.pages.academy/keksobooking/data`;
   const StatusCode = {
     OK: 200
   };
@@ -9,6 +8,7 @@
 
   window.server = {
     get: (onSuccess, onError) => {
+      const GET_URL = `https://21.javascript.pages.academy/keksobooking/data`;
       let xhr = new XMLHttpRequest();
       xhr.responseType = `json`;
 
@@ -20,7 +20,7 @@
         }
       });
 
-      xhr.open(`GET`, URL);
+      xhr.open(`GET`, GET_URL);
       xhr.send();
 
       xhr.addEventListener(`error`, function () {
@@ -33,6 +33,7 @@
       xhr.timeout = TIMEOUT_IN_MS;
     },
     post: (data, onSuccess, onError) => {
+      const POST_URL = `https://21.javascript.pages.academy/keksobooking`;
       let xhr = new XMLHttpRequest();
       xhr.responseType = `json`;
 
@@ -40,11 +41,12 @@
         onSuccess(xhr.response);
       });
 
-      xhr.addEventListener(`error`, function () {
-        onError(`Произошла ошибка, данные не отправились`);
+      xhr.addEventListener(`error`, () => {
+        onError(`Не удалось отправить данные`);
+        window.modal.showErrorModal();
       });
 
-      xhr.open(`POST`, URL);
+      xhr.open(`POST`, POST_URL);
       xhr.send(data);
     },
   };

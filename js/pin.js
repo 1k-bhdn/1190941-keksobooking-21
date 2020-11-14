@@ -20,70 +20,87 @@
   };
 
   const calcCoords = () => {
-    let mainPinCoordsX = Math.round((mainPinLeftTop.coordinates.x + MAIN_PIN.offsetWidth / 2));
-    let mainPinCoordsY = Math.round((mainPinLeftTop.coordinates.y + MAIN_PIN.offsetHeight + MAIN_PIN_AFTER_HEIGHT));
+    let xCoordinate = parseInt(MAIN_PIN.style.left, 10);
+    let yCoordinate = parseInt(MAIN_PIN.style.top, 10);
+
+    let mainPinCoordsX = Math.round((xCoordinate + MAIN_PIN.offsetWidth / 2));
+    let mainPinCoordsY = Math.round((yCoordinate + MAIN_PIN.offsetHeight + MAIN_PIN_AFTER_HEIGHT));
 
     AD_FORM_ADDRESS.value = mainPinCoordsX + `, ` + mainPinCoordsY;
   };
 
-  const moveMainPin = () => {
-    MAIN_PIN.addEventListener(`mousedown`, function (evt) {
+  const interactionMainPin = () => {
+    MAIN_PIN.addEventListener(`mousedown`, (evt) => {
       evt.preventDefault();
 
-      calcCoords();
-
-      let startCoords = {
-        x: evt.clientX,
-        y: evt.clientY
-      };
-
-      let onMouseMove = (moveEvt) => {
-        moveEvt.preventDefault();
-
-        let shift = {
-          x: startCoords.x - moveEvt.clientX,
-          y: startCoords.y - moveEvt.clientY
-        };
-
-        startCoords = {
-          x: moveEvt.clientX,
-          y: moveEvt.clientY
-        };
-
-        MAIN_PIN.style.top = (MAIN_PIN.offsetTop - shift.y) + `px`;
-        MAIN_PIN.style.left = (MAIN_PIN.offsetLeft - shift.x) + `px`;
-
-        mainPinLeftTop.coordinates.x = parseInt(MAIN_PIN.style.left, 10);
-        mainPinLeftTop.coordinates.y = parseInt(MAIN_PIN.style.top, 10);
-
-        if (mainPinLeftTop.coordinates.y < Y_LOCATION_START) {
-          MAIN_PIN.style.top = Y_LOCATION_START + `px`;
-        } else if (mainPinLeftTop.coordinates.y > Y_LOCATION_END) {
-          MAIN_PIN.style.top = Y_LOCATION_END + `px`;
-        }
-
-        if (mainPinLeftTop.coordinates.x < X_LOCATION_START) {
-          MAIN_PIN.style.left = X_LOCATION_START + `px`;
-        } else if (mainPinLeftTop.coordinates.x > X_LOCATION_END) {
-          MAIN_PIN.style.left = X_LOCATION_END + `px`;
+      if (evt.button === 0) {
+        if (MAP.classList.contains(`map--faded`)) {
+          window.map.activateMap();
         }
 
         calcCoords();
-      };
 
-      let onMouseUp = (upEvt) => {
-        upEvt.preventDefault();
+        let startCoords = {
+          x: evt.clientX,
+          y: evt.clientY
+        };
 
-        document.removeEventListener(`mousemove`, onMouseMove);
-        document.removeEventListener(`mouseup`, onMouseUp);
-      };
+        let onMouseMove = (moveEvt) => {
+          moveEvt.preventDefault();
 
-      document.addEventListener(`mousemove`, onMouseMove);
-      document.addEventListener(`mouseup`, onMouseUp);
+          let shift = {
+            x: startCoords.x - moveEvt.clientX,
+            y: startCoords.y - moveEvt.clientY
+          };
+
+          startCoords = {
+            x: moveEvt.clientX,
+            y: moveEvt.clientY
+          };
+
+          MAIN_PIN.style.top = (MAIN_PIN.offsetTop - shift.y) + `px`;
+          MAIN_PIN.style.left = (MAIN_PIN.offsetLeft - shift.x) + `px`;
+
+          mainPinLeftTop.coordinates.x = parseInt(MAIN_PIN.style.left, 10);
+          mainPinLeftTop.coordinates.y = parseInt(MAIN_PIN.style.top, 10);
+
+          if (mainPinLeftTop.coordinates.y < Y_LOCATION_START) {
+            MAIN_PIN.style.top = Y_LOCATION_START + `px`;
+          } else if (mainPinLeftTop.coordinates.y > Y_LOCATION_END) {
+            MAIN_PIN.style.top = Y_LOCATION_END + `px`;
+          }
+
+          if (mainPinLeftTop.coordinates.x < X_LOCATION_START) {
+            MAIN_PIN.style.left = X_LOCATION_START + `px`;
+          } else if (mainPinLeftTop.coordinates.x > X_LOCATION_END) {
+            MAIN_PIN.style.left = X_LOCATION_END + `px`;
+          }
+
+          calcCoords();
+        };
+
+        let onMouseUp = (upEvt) => {
+          upEvt.preventDefault();
+
+          document.removeEventListener(`mousemove`, onMouseMove);
+          document.removeEventListener(`mouseup`, onMouseUp);
+        };
+
+        document.addEventListener(`mousemove`, onMouseMove);
+        document.addEventListener(`mouseup`, onMouseUp);
+      }
+    });
+
+    MAIN_PIN.addEventListener(`keydown`, (evt) => {
+      if (evt.key === `Enter`) {
+        if (MAP.classList.contains(`map--faded`)) {
+          window.map.activateMap();
+        }
+      }
     });
   };
 
-  moveMainPin();
+  interactionMainPin();
 
   window.pin = {
     renderAdPin: (data) => {
@@ -108,6 +125,12 @@
         window.map.toggleFieldsAvailability(`none`);
         window.form.toggleFieldsAvailability(false);
       }
+    },
+    setMainPinStartLocation: () => {
+      MAIN_PIN.style.left = 570 + `px`;
+      MAIN_PIN.style.top = 375 + `px`;
+
+      calcCoords();
     },
     mainPinNotActiveLocation: AD_FORM_ADDRESS.value = Math.round((mainPinLeftTop.coordinates.x + MAIN_PIN.offsetWidth / 2))
       + `, `
